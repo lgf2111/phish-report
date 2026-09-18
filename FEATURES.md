@@ -27,7 +27,7 @@ Pick one, build it on a branch, open a PR, then add your name here.
 | Feature | Description | Owner |
 | --- | --- | --- |
 | `io_manager.py` | Input collection, validation and re-prompting; the display functions | Lee Guan Feng |
-| `ai_manager.py` | The DeepSeek call, JSON parsing, schema validation and error handling | Pair A |
+| `ai_manager.py` | The Groq call, JSON parsing, schema validation and error handling | Pair A |
 | `logic_manager.py` | The business rules: priority, score, checklist and the decision table | Pair B |
 | `data_manager.py` | Save / load / query of reports, including missing/corrupt file handling | Pair C |
 | Report filtering | Use `query()` to filter saved reports by priority in the menu | Pair C |

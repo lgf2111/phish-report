@@ -8,7 +8,7 @@
 #   ./docker.sh clean     # remove the image
 #
 # First time only: make it runnable with  chmod +x docker.sh
-# You need Docker Desktop open, and a .env file with your DEEPSEEK_API_KEY.
+# You need Docker Desktop open, and a .env file with your GROQ_API_KEY.
 
 IMAGE="phishreport"
 
@@ -24,7 +24,7 @@ if [ "$command" = "build" ]; then
 
 elif [ "$command" = "run" ]; then
     if [ ! -f .env ]; then
-        echo "No .env file found. Make one with:  DEEPSEEK_API_KEY=your_key"
+        echo "No .env file found. Make one with:  GROQ_API_KEY=your_key"
         exit 1
     fi
     echo "Starting the app (Ctrl+C to quit)..."
@@ -45,7 +45,7 @@ else
     echo "Usage: ./docker.sh [command]"
     echo ""
     echo "  build   build the Docker image"
-    echo "  run     run the app (needs .env with DEEPSEEK_API_KEY)"
+    echo "  run     run the app (needs .env with GROQ_API_KEY)"
     echo "  test    run the tests in the container"
     echo "  clean   delete the image"
 fi
