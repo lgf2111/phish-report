@@ -1,5 +1,20 @@
-# Project Specs
-Grading Criteria1.pdf
-Project Initial Details.pdf
-Team Project Specification.pdf
-Team Project Framework - Phase 1.pdf
+# Project spec PDFs (not shared in the repo)
+documents/
+*.pdf
+
+# Virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Test cache
+.pytest_cache/
+
+# Saved reports (created when the app runs)
+reports.json
+
+# Mac / secrets (never commit your API key)
+.DS_Store
+.env

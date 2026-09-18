@@ -1,0 +1,65 @@
+# io_manager.py
+# All input() and print() live here. OWNER: Lee Guan Feng.
+
+
+def main_menu():
+    # show the menu and return the user's choice
+    print()
+    print("=== PhishReport ===")
+    print("1. Check a new message")
+    print("2. View saved reports")
+    print("3. Quit")
+    return input("Choose 1-3: ").strip()
+
+
+def collect_input():
+    # ask the user about the message and what they did
+    message = input("Paste the suspicious message: ").strip()
+    while message == "":
+        message = input("Message cannot be empty. Paste it again: ").strip()
+
+    submitted = input("Did you give a password or code? (password/otp/no): ").strip()
+    while submitted not in ("password", "otp", "no"):
+        submitted = input("Please type password, otp or no: ").strip()
+    if submitted == "no":
+        submitted = None
+
+    clicked = ask_yes_no("Did you click a link? (y/n): ")
+    downloaded = ask_yes_no("Did you download a file? (y/n): ")
+
+    return {
+        "message": message,
+        "submitted_category": submitted,
+        "clicked": clicked,
+        "downloaded": downloaded,
+    }
+
+
+def ask_yes_no(question):
+    answer = input(question).strip().lower()
+    while answer not in ("y", "n"):
+        answer = input("Please type y or n: ").strip().lower()
+    return answer == "y"
+
+
+def display_result(result):
+    print()
+    print("Priority:", result["priority"])
+    print("Score:", result["score"])
+    print("What to do:")
+    for step in result["checklist"]:
+        print(" -", step)
+
+
+def display_list(records):
+    if not records:
+        print("No saved reports yet.")
+        return
+    print()
+    for i, record in enumerate(records, start=1):
+        result = record.get("result", {})
+        print(i, "-", result.get("priority", "?"), "-", record.get("message", "")[:50])
+
+
+def show_message(text):
+    print(text)
