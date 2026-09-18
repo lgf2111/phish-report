@@ -5,6 +5,7 @@
 #   ./docker.sh build     # build the Docker image
 #   ./docker.sh run       # run the app (loads your key from .env)
 #   ./docker.sh test      # run the tests inside the container
+#   ./docker.sh shell     # open a shell inside the container (to look around)
 #   ./docker.sh clean     # remove the image
 #
 # First time only: make it runnable with  chmod +x docker.sh
@@ -35,6 +36,17 @@ elif [ "$command" = "test" ]; then
     echo "Running the tests inside the container..."
     docker run --rm "$IMAGE" pytest
 
+elif [ "$command" = "shell" ]; then
+    # Open an interactive shell INSIDE the container so you can look around
+    # (Docker containers have no SSH; this is how you "get inside" one).
+    # Loads .env if you have it, so your key is available in there too.
+    echo "Opening a shell inside the container (type 'exit' to leave)..."
+    if [ -f .env ]; then
+        docker run --rm -it --env-file .env "$IMAGE" /bin/bash
+    else
+        docker run --rm -it "$IMAGE" /bin/bash
+    fi
+
 elif [ "$command" = "clean" ]; then
     echo "Removing the $IMAGE image..."
     docker rmi "$IMAGE"
@@ -47,5 +59,6 @@ else
     echo "  build   build the Docker image"
     echo "  run     run the app (needs .env with GROQ_API_KEY)"
     echo "  test    run the tests in the container"
+    echo "  shell   open a shell inside the container"
     echo "  clean   delete the image"
 fi
