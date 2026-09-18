@@ -3,9 +3,8 @@
 # reading the AI's JSON reply, and checking it has the right shape.
 # We never call the real Groq API here.
 
-import pytest
-
 import ai_manager
+import pytest
 
 
 def test_build_prompt_includes_the_message():
@@ -26,7 +25,8 @@ def test_parse_response_plain_json():
 
 def test_parse_response_strips_code_fence():
     # models sometimes wrap the JSON in ```json ... ```
-    raw = '```json\n{"credential_request": false, "suspicious": true, "insufficient_context": false}\n```'
+    inner = '{"credential_request": false, "suspicious": true, "insufficient_context": false}'
+    raw = "```json\n" + inner + "\n```"
     data = ai_manager.parse_response(raw)
     assert data["suspicious"] is True
 

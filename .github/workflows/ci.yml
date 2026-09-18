@@ -5,6 +5,22 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  # Job 0: check the code style with ruff (a fast Python linter).
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Check code style
+        run: ruff check .
+
   # Job 1: run the offline tests on plain Python.
   test:
     runs-on: ubuntu-latest

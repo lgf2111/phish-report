@@ -1,0 +1,11 @@
+# Settings for ruff, the linter we run in CI.
+# Keep it simple: check for real problems, not nit-picky style.
+
+line-length = 100
+
+# Look at our code and tests, skip the virtual environment.
+extend-exclude = [".venv"]
+
+[lint]
+# E/W = pycodestyle, F = pyflakes (unused imports/vars, etc.), I = import order.
+select = ["E", "W", "F", "I"]
