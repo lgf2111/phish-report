@@ -21,6 +21,17 @@ jobs:
       - name: Check code style
         run: ruff check .
 
+      # Hard constraint C1: the code must be 100% procedural - no classes.
+      # This fails the build if anyone adds a class definition in app/.
+      - name: Check for class definitions (must be none)
+        run: |
+          if grep -rnE '^[[:space:]]*class[[:space:]]+[A-Za-z_]' app/; then
+            echo "ERROR: found a class definition in app/ - this project must be 100% procedural (no classes)."
+            exit 1
+          else
+            echo "OK: no class definitions found."
+          fi
+
   # Job 1: run the offline tests on plain Python.
   test:
     runs-on: ubuntu-latest
