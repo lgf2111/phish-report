@@ -3,33 +3,39 @@
 This file records who built what, so everyone gets credit for their work.
 Add a row when you finish a feature. Link the pull request if you can.
 
-## Contributions
+## Done so far
 
-| Feature | Description | Owner | Status | PR / commit |
-| --- | --- | --- | --- | --- |
-| MVP (minimal working app) | First end-to-end version: the four managers wired together through `main.py` so a message goes input → AI → rules → save → display | Lee Guan Feng | Done | #? |
-| DeepSeek AI integration | `ai_manager.py` calls the DeepSeek API, requests JSON and validates the reply | Lee Guan Feng | Done | #? |
-| Business rules | `logic_manager.py`: five-tier priority, score and checklist | Lee Guan Feng (starter, to be extended by Pair B) | Done | #? |
-| JSON storage | `data_manager.py`: save/load/query reports to `reports.json` | Lee Guan Feng (starter, to be extended by Pair C) | Done | #? |
-| Offline tests | `tests/test_logic_manager.py`: tests the rules with fake AI answers, no live API | Lee Guan Feng | Done | #? |
-| Docker | `Dockerfile` plus `docker.sh` helper so the app runs the same on any laptop | Lee Guan Feng | Done | #? |
-| GitHub Actions CI | `.github/workflows/ci.yml`: runs tests and builds/tests the Docker image on every push and PR | Lee Guan Feng | Done | #1 |
-| Project docs | `README.md` (setup/run guide) and this file | Lee Guan Feng | Done | #? |
+The project scaffolding and DevOps setup are in place. The four managers have
+working starter versions so the app runs end to end, but they are meant to be
+built out by their owners (see "Up for grabs" below).
 
-## To do (up for grabs)
+| Feature | Description | Owner | PR / commit |
+| --- | --- | --- | --- |
+| Project setup & MVP wiring | Repo layout, `main.py` connecting the pipeline, and starter stubs so the app runs end to end | Lee Guan Feng | #? |
+| Offline tests | `tests/test_logic_manager.py`: tests the rules with fake AI answers, no live API | Lee Guan Feng | #? |
+| Docker | `Dockerfile` plus `docker.sh` helper so the app runs the same on any laptop | Lee Guan Feng | #? |
+| GitHub Actions CI | `.github/workflows/ci.yml`: runs tests and builds/tests the Docker image on every push and PR | Lee Guan Feng | #1 |
+| Project docs | `README.md` (setup/run guide) and this file | Lee Guan Feng | #? |
 
-Replace the owner when you pick one up.
+The starter versions of the four managers were added just to get the app
+running; the owners below should replace/extend them and take the credit.
+
+## Up for grabs (the real feature work)
+
+Pick one, build it on a branch, open a PR, then add your name here.
 
 | Feature | Description | Owner |
 | --- | --- | --- |
-| Input collection & validation | Flesh out `io_manager.py`: nicer prompts, stronger validation and re-prompting | Lee Guan Feng |
-| Real AI error handling | Retries and clear messages for timeouts / bad JSON in `ai_manager.py` | Pair A |
-| Extended rules | More rules and a full decision table in `logic_manager.py` | Pair B |
+| `io_manager.py` | Input collection, validation and re-prompting; the display functions | Lee Guan Feng |
+| `ai_manager.py` | The DeepSeek call, JSON parsing, schema validation and error handling | Pair A |
+| `logic_manager.py` | The business rules: priority, score, checklist and the decision table | Pair B |
+| `data_manager.py` | Save / load / query of reports, including missing/corrupt file handling | Pair C |
 | Report filtering | Use `query()` to filter saved reports by priority in the menu | Pair C |
 | Report status updates | Let users mark a report as handled / ignored | TBD |
 
 ## How to add your credit
 
 1. Do your work on a branch and open a pull request (see the README).
-2. When it is merged, add a row above with your name and the PR number.
+2. When it is merged, move the feature into the "Done" table with your name
+   and the PR number.
 3. Keep descriptions short - one line is enough.
