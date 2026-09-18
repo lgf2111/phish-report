@@ -1,0 +1,39 @@
+# Makes a GitHub Release automatically when you push a version tag.
+#
+# How to cut a release:
+#   git tag v1.0.0
+#   git push origin v1.0.0
+#
+# This runs the tests first (so a broken tag won't become a release), then
+# creates the release with auto-generated notes from the merged PRs/commits.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"   # any tag that starts with v, e.g. v1.0.0
+
+# needed so the workflow can create a release
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run tests (gate before releasing)
+        run: pytest
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
