@@ -11,6 +11,6 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # run the app by default. pass your key like:
-#   docker run --rm -it -e DEEPSEEK_API_KEY=xxx phishreport
+#   docker run --rm -it -e GROQ_API_KEY=xxx phishreport
 # to run the tests instead:  docker run --rm phishreport pytest
 CMD ["python", "app/main.py"]

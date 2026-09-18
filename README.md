@@ -19,7 +19,7 @@ you  ->  io_manager  ->  ai_manager  ->  logic_manager  ->  data_manager
 | File | What it does | Owner |
 | --- | --- | --- |
 | `app/io_manager.py` | Menu, questions and printing (all input/print live here) | Lee Guan Feng |
-| `app/ai_manager.py` | Sends the message to the DeepSeek API, checks the reply | Pair A |
+| `app/ai_manager.py` | Sends the message to the Groq API, checks the reply | Pair A |
 | `app/logic_manager.py` | The rules: priority, score, checklist | Pair B |
 | `app/data_manager.py` | Saves and loads reports (`reports.json`) | Pair C |
 | `app/main.py` | Runs the menu and connects the four managers | shared |
@@ -40,17 +40,17 @@ source .venv/bin/activate        # Mac/Linux
 pip install -r requirements.txt
 
 # 4. add your API key
-cp .env.example .env             # then open .env and paste your DeepSeek key
+cp .env.example .env             # then open .env and paste your Groq key
 ```
 
 Your key goes in `.env` like this:
 
 ```
-DEEPSEEK_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
 ```
 
-`.env` is gitignored, so your key never gets uploaded. Get a key from the
-DeepSeek website.
+`.env` is gitignored, so your key never gets uploaded. Get a free key from the
+Groq console (https://console.groq.com).
 
 ## Running the app
 
