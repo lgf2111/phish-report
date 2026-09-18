@@ -1,19 +1,22 @@
 # ai_manager.py
-# Talks to the DeepSeek API. No business rules here. OWNER: Pair A.
+# Talks to the Groq API (free tier). No business rules here. OWNER: Pair A.
 #
 # Every message goes through here - this is the core of the app.
 # Uses only the Python standard library (urllib) so there is nothing extra to
-# install. The API key is read from the DEEPSEEK_API_KEY environment variable
-# so it is never written into the code.
+# install. The API key is read from the GROQ_API_KEY environment variable so it
+# is never written into the code.
+#
+# Get a free key at https://console.groq.com (no credit card needed).
 
 import json
 import os
 import urllib.error
 import urllib.request
 
-# DeepSeek's API is OpenAI-style. You can change the model with DEEPSEEK_MODEL.
-MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
-URL = "https://api.deepseek.com/chat/completions"
+# Groq's API is OpenAI-style. Change the model with the GROQ_MODEL env var.
+# (Run the /models endpoint or check the Groq console to see what your key can use.)
+MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
+URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # The keys we expect back from the AI.
 REQUIRED_KEYS = ("credential_request", "suspicious", "insufficient_context")
@@ -34,10 +37,10 @@ def build_prompt(record):
 
 
 def call_api(prompt):
-    # send the prompt to DeepSeek and return the raw text reply.
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    # send the prompt to Groq and return the raw text reply.
+    api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise RuntimeError("Set the DEEPSEEK_API_KEY environment variable first.")
+        raise RuntimeError("Set the GROQ_API_KEY environment variable first.")
 
     body = json.dumps({
         "model": MODEL,
@@ -51,6 +54,9 @@ def call_api(prompt):
         headers={
             "Content-Type": "application/json",
             "Authorization": "Bearer " + api_key,
+            # A User-Agent is needed or the request gets blocked before it
+            # reaches the API.
+            "User-Agent": "phishreport/1.0",
         },
     )
     try:
@@ -60,7 +66,7 @@ def call_api(prompt):
         # log and stop - do not pretend we got an answer
         raise RuntimeError("Could not reach the AI: " + str(error)) from error
 
-    # pull the text out of DeepSeek's response shape
+    # pull the text out of Groq's (OpenAI-style) response shape
     return data["choices"][0]["message"]["content"]
 
 
