@@ -1,0 +1,35 @@
+# Runs automatically on GitHub whenever we push or open a pull request.
+# It checks that the tests pass and that the app builds and runs in Docker.
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  # Job 1: run the offline tests on plain Python.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest
+
+  # Job 2: build the Docker image and run the tests inside it.
+  # This proves the container works, which is part of the grade.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the Docker image
+        run: docker build -t phishreport .
+
+      - name: Run the tests inside the container
+        run: docker run --rm phishreport pytest
