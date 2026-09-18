@@ -1,5 +1,7 @@
 # PhishReport
 
+[![CI](https://github.com/lgf2111/phish-report/actions/workflows/ci.yml/badge.svg)](https://github.com/lgf2111/phish-report/actions/workflows/ci.yml)
+
 A simple command-line tool that checks if a message looks like phishing.
 You paste a suspicious message and say what you did (clicked a link, gave a
 password, etc). The app sends the message to an AI, applies our rules, and
