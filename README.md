@@ -122,6 +122,33 @@ Then open a Pull Request on GitHub and ask a teammate to review before
 merging. Small, frequent commits with clear messages are what we're graded on,
 so commit as you go rather than one big dump at the end.
 
+## Code rules and automatic checks
+
+Every push and pull request is checked automatically by GitHub Actions (you
+don't run these yourself, they just run online). If something goes red, click
+the failed check to see why. There are three checks:
+
+**1. No classes allowed.** This is the big one. The assignment requires the
+whole app to be written with functions only - **no `class` anywhere**. It's an
+instant-fail rule for the grade, so CI will block any code in `app/` that
+contains a class. If your check fails with a "found a class definition"
+message, rewrite it using plain functions.
+
+**2. Lint (ruff).** We run `ruff`, a linter that flags things like unused
+imports, bad import order and over-long lines. To avoid surprises:
+
+- Install the **Ruff extension** in your IDE (VS Code: search "Ruff"). It
+  underlines problems as you type and can auto-fix them on save.
+- Or run it yourself before pushing:
+
+  ```bash
+  ruff check .          # show problems
+  ruff check . --fix    # fix the easy ones automatically
+  ```
+
+**3. Tests.** The tests in `tests/` run automatically. If you change the rules
+in `logic_manager`, update or add a test so it still passes.
+
 ## Notes
 
 - The AI reply is JSON with three true/false fields: `credential_request`,
