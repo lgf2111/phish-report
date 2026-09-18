@@ -67,7 +67,7 @@ A small main program coordinates the workflow and delegates user-facing messages
 
 **Hard constraints:** no class definitions in team-authored code, AI essential to the main purpose, schema-validated JSON responses, CSV/JSON persistence, working Docker delivery and meaningful Git history. Framework 1 marks the procedural and AI-core constraints as instant-fail conditions.
 
-## Six-person contribution plan
+## Six-person contribution plan (Suggestion - not fixed)
 
 Use three pairs for initial feature ownership. Members M1-M6 are placeholders to replace with team names. Pair ownership does not replace individual tasks, commits and pull requests.
 
