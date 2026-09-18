@@ -55,3 +55,39 @@ def test_evaluate_gives_priority_score_and_checklist():
     result = logic_manager.evaluate(record)
     assert result["priority"] == "medium"
     assert result["checklist"]  # not empty
+
+
+def test_medium_when_suspicious_and_downloaded():
+    record = make_record({"suspicious": True}, downloaded=True)
+    assert logic_manager.route(record) == "medium"
+
+
+def test_high_beats_medium_when_both_apply():
+    # credential request + submitted secret AND clicked -> should still be high
+    record = make_record({"credential_request": True, "suspicious": True},
+                         submitted="otp", clicked=True)
+    assert logic_manager.route(record) == "high"
+
+
+def test_otp_counts_as_submitted_secret():
+    record = make_record({"credential_request": True}, submitted="otp")
+    assert logic_manager.route(record) == "high"
+
+
+def test_score_is_within_0_to_100():
+    for ai in ({"credential_request": True}, {"suspicious": True}, {}):
+        record = make_record(ai, submitted="password")
+        assert 0 <= logic_manager.score(record) <= 100
+
+
+def test_every_priority_has_a_checklist():
+    records = [
+        make_record({"credential_request": True}, submitted="password"),  # high
+        make_record({"suspicious": True}, clicked=True),                  # medium
+        make_record({"suspicious": True}),                                # review
+        make_record({"insufficient_context": True}),                      # insufficient
+        make_record({}),                                                  # none
+    ]
+    for record in records:
+        result = logic_manager.evaluate(record)
+        assert result["checklist"], "checklist should never be empty"
