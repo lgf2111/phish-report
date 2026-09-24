@@ -51,6 +51,10 @@ def extract_prompt(record):
         "IP addresses: syntactically valid IPv4 or IPv6 addresses.\n"
         "Include every matching occurrence in its category, in message order. "
         "Preserve repeated occurrences and copy each value exactly as written. "
+        "Count literal occurrences in the raw message: an email in a Markdown "
+        "link label and in its mailto target counts twice. For example, "
+        "'[a1@example.test](mailto:a1@example.test)' contains two occurrences "
+        "of 'a1@example.test'. "
         "Do not normalize, invent, or complete values.\n"
         "Use an empty list for any category with no matches, including all three "
         "categories when nothing matches. Do not require all types to be present "
@@ -108,7 +112,7 @@ def validate_details(data, message):
                 raise ValueError("AI detail entries must be nonempty strings: " + key)
             if key == "ip_addresses":
                 try:
-                    ipaddress.ip_address(value)
+                    address = ipaddress.ip_address(value)
                 except ValueError as error:
                     raise ValueError("AI detail has invalid IP address syntax.") from error
             elif re.fullmatch(formats[key], value) is None:
@@ -120,6 +124,9 @@ def validate_details(data, message):
                 # Allow joined prose after grouped phones, but reject longer numbers.
                 before += r"(?<![0-9] )"
                 after = r"(?![\d@]| [0-9])"
+            elif key == "ip_addresses" and address.version == 4:
+                # IPv4 can touch prose; extra digits or address segments cannot follow.
+                after = r"(?![\d_:%]|\.[0-9])"
             occurrence = re.compile(before + re.escape(value) + after)
             for match in occurrence.finditer(message, position):
                 if key == "phone_numbers" and any(
