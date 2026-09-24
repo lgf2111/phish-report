@@ -176,6 +176,41 @@ def response_prompt(details):
     )
 
 
+def validate_reply(data, details):
+    """Check the final AI reply against the details returned by the Logic Manager.
+
+    Args:
+        data: The parsed AI object containing a response string.
+        details: The validated detail lists returned by the Logic Manager.
+
+    Returns:
+        The original AI response string when its format and values match.
+
+    Raises:
+        ValueError: If the reply has an invalid shape, format, or detail values.
+    """
+    # Require the AI's response field rather than supplying a default response.
+    if not isinstance(data, dict) or set(data) != {"response"}:
+        raise ValueError("AI reply must contain exactly one field: response.")
+    reply = data["response"]
+    if not isinstance(reply, str):
+        raise ValueError("AI response must be text.")
+
+    # Match the agreed labels and separators on one line, including empty fields.
+    pattern = r"Email: ([^\r\n]*), Phone Number: ([^\r\n]*), IP Address: ([^\r\n]*)"
+    match = re.fullmatch(pattern, reply)
+    if match is None:
+        raise ValueError("AI response does not follow the required display format.")
+
+    # Compare each category exactly to preserve order, repeats, and empty lists.
+    for key, text in zip(("emails", "phone_numbers", "ip_addresses"), match.groups()):
+        values = text.split(", ") if text else []
+        if values != details[key]:
+            raise ValueError("AI response does not match returned details: " + key)
+
+    return reply
+
+
 def call_api(prompt):
     # send the prompt to Groq and return the raw text reply.
     api_key = os.environ.get("GROQ_API_KEY")
