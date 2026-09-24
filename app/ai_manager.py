@@ -8,8 +8,10 @@
 #
 # Get a free key at https://console.groq.com (no credit card needed).
 
+import ipaddress
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 
@@ -69,6 +71,76 @@ def build_extraction_prompt(record):
         "actual assignment, or whether a contact exists.\n"
         "Message (JSON string):\n" + message
     )
+
+
+def validate_details(data, message):
+    """Validate AI-extracted detail lists against their formats and source text.
+
+    Args:
+        data: The parsed AI object with emails, phone_numbers, and ip_addresses.
+        message: The original user message supplied to the AI.
+
+    Returns:
+        The unchanged dictionary when its returned values pass validation.
+
+    Raises:
+        ValueError: If the object, formats, or source occurrences do not match.
+    """
+    # Require the agreed JSON shape without inserting missing categories.
+    keys = ("emails", "phone_numbers", "ip_addresses")
+    if not isinstance(data, dict) or set(data) != set(keys):
+        raise ValueError("AI details must contain exactly: " + ", ".join(keys))
+    if not isinstance(message, str):
+        raise ValueError("The original message must be text.")
+
+    # Check syntax only; these patterns do not establish real-world existence.
+    formats = {
+        "emails": r"[A-Za-z0-9]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]+",
+        "phone_numbers": r"[0-9]{8}",
+    }
+    boundaries = {
+        "emails": (r"(?<![\w.!#$%&'*+/=?^`{|}~@-])", r"(?![\w@-]|\.[A-Za-z0-9])"),
+        "phone_numbers": (r"(?<![\w@])", r"(?![\w@])"),
+        "ip_addresses": (r"(?<![\w:.%])", r"(?![\w:%]|\.[0-9])"),
+    }
+    # Exclude phone substrings inside email tokens, including domain labels.
+    email_spans = [
+        match.span()
+        for match in re.finditer(r"[\w.!#$%&'*+/=?^`{|}~+-]+@[\w.-]+", message)
+    ]
+
+    for key in keys:
+        if not isinstance(data[key], list):
+            raise ValueError("AI detail field must be a list: " + key)
+
+        # Advance through distinct source occurrences to preserve order and repeats.
+        position = 0
+        for value in data[key]:
+            if not isinstance(value, str) or not value:
+                raise ValueError("AI detail entries must be nonempty strings: " + key)
+            if key == "ip_addresses":
+                try:
+                    ipaddress.ip_address(value)
+                except ValueError as error:
+                    raise ValueError("AI detail has invalid IP address syntax.") from error
+            elif re.fullmatch(formats[key], value) is None:
+                raise ValueError("AI detail has invalid format: " + key)
+
+            # Match the AI's exact text without normalizing or supplying a value.
+            before, after = boundaries[key]
+            occurrence = re.compile(before + re.escape(value) + after)
+            for match in occurrence.finditer(message, position):
+                if key == "phone_numbers" and any(
+                    start <= match.start() and match.end() <= end
+                    for start, end in email_spans
+                ):
+                    continue
+                position = match.end()
+                break
+            else:
+                raise ValueError("AI detail has no matching source occurrence in order: " + key)
+
+    return data
 
 
 def call_api(prompt):
