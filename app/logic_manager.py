@@ -1,6 +1,6 @@
 # logic_manager.py
-# The business rules. Works out a priority, a score and a checklist from the
-# AI output plus what the user did. OWNER: Pair B.
+# Holds extracted details for the AI-to-Logic-to-AI flow. OWNER: Pair B.
+# The existing scoring functions remain until the new flow is connected.
 #
 # Rules (checked top to bottom, from the proposal):
 #   1. high   - AI saw a credential request AND user submitted a password/OTP
@@ -8,6 +8,20 @@
 #   3. review - suspicious, but nothing above matched
 #   4. insufficient - AI could not tell
 #   5. none   - nothing above (not a promise that it's safe)
+
+
+def hold_details(details):
+    """Hold the AI-extracted details for this request and return them unchanged.
+
+    Args:
+        details: A dictionary of emails, phone_numbers, and ip_addresses lists.
+
+    Returns:
+        The same dictionary, preserving its lists, order, and repeated values.
+    """
+    # Keep the supplied object locally for the handoff back to the AI Manager.
+    held_details = details
+    return held_details
 
 
 def route(record):
