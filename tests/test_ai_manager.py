@@ -11,17 +11,6 @@ import logic_manager
 import pytest
 
 
-def test_prompt():
-    """Include the message and phishing fields in the original prompt."""
-    # Check the source text and the expected response fields.
-    prompt = ai_manager.build_prompt({"message": "click here to win"})
-    assert "click here to win" in prompt
-    # it should also ask for JSON with our three keys
-    assert "credential_request" in prompt
-    assert "suspicious" in prompt
-    assert "insufficient_context" in prompt
-
-
 @pytest.mark.parametrize(
     "message",
     [
@@ -39,7 +28,7 @@ def test_extract_prompt(message):
     # Preserve the original record so prompt construction cannot change its data.
     record = {"message": message}
     original = record.copy()
-    prompt = ai_manager.build_extraction_prompt(record)
+    prompt = ai_manager.extract_prompt(record)
 
     # Decode the input section to check quotes and newlines survive unchanged.
     instructions, encoded_message = prompt.split("Message (JSON string):\n", 1)
@@ -396,40 +385,16 @@ def test_final_blanks(text):
 
 def test_json_reply():
     """Parse the AI's JSON reply into Python values."""
-    # Confirm plain JSON preserves the Boolean field values.
-    raw = '{"credential_request": true, "suspicious": false, "insufficient_context": false}'
+    # Confirm plain JSON preserves extracted lists and absent categories.
+    raw = '{"emails": ["a1@example.test"], "phone_numbers": [], "ip_addresses": []}'
     data = ai_manager.parse_response(raw)
-    assert data["credential_request"] is True
-    assert data["suspicious"] is False
+    assert data == {"emails": ["a1@example.test"], "phone_numbers": [], "ip_addresses": []}
 
 
 def test_fenced_reply():
     """Parse a JSON reply enclosed in a Markdown code fence."""
     # models sometimes wrap the JSON in ```json ... ```
-    inner = '{"credential_request": false, "suspicious": true, "insufficient_context": false}'
+    inner = '{"response": "Email: , Phone Number: , IP Address: "}'
     raw = "```json\n" + inner + "\n```"
     data = ai_manager.parse_response(raw)
-    assert data["suspicious"] is True
-
-
-def test_valid_reply():
-    """Accept a reply containing all required Boolean fields."""
-    good = {"credential_request": True, "suspicious": False, "insufficient_context": False}
-    # should return the same dict without raising
-    assert ai_manager.validate_response(good) == good
-
-
-def test_missing_key():
-    """Reject a reply that omits a required Boolean field."""
-    # Omit one required field to exercise response validation.
-    bad = {"credential_request": True, "suspicious": False}  # no insufficient_context
-    with pytest.raises(ValueError):
-        ai_manager.validate_response(bad)
-
-
-def test_reply_type():
-    """Reject non-Boolean values in the original AI reply."""
-    # A string must not be accepted in place of a Boolean.
-    bad = {"credential_request": "yes", "suspicious": False, "insufficient_context": False}
-    with pytest.raises(ValueError):
-        ai_manager.validate_response(bad)
+    assert data == {"response": "Email: , Phone Number: , IP Address: "}

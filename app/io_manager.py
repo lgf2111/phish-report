@@ -3,6 +3,7 @@
 
 
 def main_menu():
+    """Display the available actions and return the user's menu choice."""
     # show the menu and return the user's choice
     print()
     print("=== PhishReport ===")
@@ -13,53 +14,39 @@ def main_menu():
 
 
 def collect_input():
-    # ask the user about the message and what they did
-    message = input("Paste the suspicious message: ").strip()
+    """Collect a nonempty message and return it in a new report record."""
+    # Repeat the input question until there is text for the AI to examine.
+    message = input("Paste the message: ").strip()
     while message == "":
         message = input("Message cannot be empty. Paste it again: ").strip()
 
-    submitted = input("Did you give a password or code? (password/otp/no): ").strip()
-    while submitted not in ("password", "otp", "no"):
-        submitted = input("Please type password, otp or no: ").strip()
-    if submitted == "no":
-        submitted = None
-
-    clicked = ask_yes_no("Did you click a link? (y/n): ")
-    downloaded = ask_yes_no("Did you download a file? (y/n): ")
-
-    return {
-        "message": message,
-        "submitted_category": submitted,
-        "clicked": clicked,
-        "downloaded": downloaded,
-    }
+    return {"message": message}
 
 
-def ask_yes_no(question):
-    answer = input(question).strip().lower()
-    while answer not in ("y", "n"):
-        answer = input("Please type y or n: ").strip().lower()
-    return answer == "y"
-
-
-def display_result(result):
+def display_result(response):
+    """Display the validated final response supplied by the AI."""
+    # Print the original response without composing or changing its contents.
     print()
-    print("Priority:", result["priority"])
-    print("Score:", result["score"])
-    print("What to do:")
-    for step in result["checklist"]:
-        print(" -", step)
+    print(response)
 
 
 def display_list(records):
+    """Display saved AI responses and summaries of earlier scoring reports."""
+    # Preserve the existing empty-history message.
     if not records:
         print("No saved reports yet.")
         return
     print()
     for i, record in enumerate(records, start=1):
-        result = record.get("result", {})
-        print(i, "-", result.get("priority", "?"), "-", record.get("message", "")[:50])
+        # Older records retain their stored priority; no new score is calculated.
+        if "response" in record:
+            summary = record["response"]
+        else:
+            summary = record.get("result", {}).get("priority", "?")
+        print(i, "-", summary, "-", record.get("message", "")[:50])
 
 
 def show_message(text):
+    """Display a menu or error message supplied by the application."""
+    # Keep terminal output in the I/O Manager.
     print(text)
