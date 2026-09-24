@@ -45,6 +45,14 @@ def flow(monkeypatch, tmp_path):
             "Email: a1@example.test, Phone Number: , IP Address: ",
         ),
         (
+            {
+                "emails": ["security-alert@example.com"],
+                "phone_numbers": ["8000 1234"],
+                "ip_addresses": [],
+            },
+            "Email: security-alert@example.com, Phone Number: 8000 1234, IP Address: ",
+        ),
+        (
             {"emails": [], "phone_numbers": ["00123456"], "ip_addresses": []},
             "Email: , Phone Number: 00123456, IP Address: ",
         ),
