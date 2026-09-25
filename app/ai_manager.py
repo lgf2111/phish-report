@@ -20,6 +20,7 @@ import urllib.request
 MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 URL = "https://api.groq.com/openai/v1/chat/completions"
 
+
 def extract_prompt(record):
     """Build AI instructions to extract every matching detail from a message.
 
@@ -48,7 +49,12 @@ def extract_prompt(record):
         "run together: 'Call 8000 1234Please reply' contains '8000 1234'. "
         "Do not extract from inside a word, email, or longer number, including "
         "a longer sequence of space-separated digit groups.\n"
-        "IP addresses: syntactically valid IPv4 or IPv6 addresses.\n"
+        "IP addresses: syntactically valid IPv4 or IPv6 addresses. "
+        "An IP: label (case-insensitive) may directly precede the address. "
+        "The label's colon is separate from the address: 'IP:::1' contains '::1', "
+        "and 'IP:::ffff:192.0.2.10' contains '::ffff:192.0.2.10'. "
+        "Keep the complete IPv6 address, including any embedded IPv4 portion; "
+        "do not extract that embedded portion as a separate IPv4 address.\n"
         "Include every matching occurrence in its category, in message order. "
         "Preserve repeated occurrences and copy each value exactly as written. "
         "Count literal occurrences in the raw message: an email in a Markdown "
@@ -93,12 +99,15 @@ def validate_details(data, message):
     boundaries = {
         "emails": (r"(?<![\w.!#$%&'*+/=?^`{|}~@-])", r"(?![\w@-]|\.[A-Za-z0-9])"),
         "phone_numbers": (r"(?<![\w@])", r"(?![\w@])"),
-        "ip_addresses": (r"(?<![\w:.%])", r"(?![\w:%]|\.[0-9])"),
+        # Allow an IP label's colon while excluding prefixes within larger addresses.
+        "ip_addresses": (
+            r"(?:(?<![\w:.%])|(?<=\b[Ii][Pp]:))",
+            r"(?![\w:%]|\.[0-9])",
+        ),
     }
     # Exclude phone substrings inside email tokens, including domain labels.
     email_spans = [
-        match.span()
-        for match in re.finditer(r"[\w.!#$%&'*+/=?^`{|}~+-]+@[\w.-]+", message)
+        match.span() for match in re.finditer(r"[\w.!#$%&'*+/=?^`{|}~+-]+@[\w.-]+", message)
     ]
 
     for key in keys:
@@ -130,8 +139,7 @@ def validate_details(data, message):
             occurrence = re.compile(before + re.escape(value) + after)
             for match in occurrence.finditer(message, position):
                 if key == "phone_numbers" and any(
-                    start <= match.start() and match.end() <= end
-                    for start, end in email_spans
+                    start <= match.start() and match.end() <= end for start, end in email_spans
                 ):
                     continue
                 position = match.end()
@@ -221,11 +229,13 @@ def call_api(prompt):
     if not api_key:
         raise RuntimeError("Set the GROQ_API_KEY environment variable first.")
 
-    body = json.dumps({
-        "model": MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "response_format": {"type": "json_object"},
-    }).encode()
+    body = json.dumps(
+        {
+            "model": MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "response_format": {"type": "json_object"},
+        }
+    ).encode()
 
     request = urllib.request.Request(
         URL,

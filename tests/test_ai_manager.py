@@ -19,6 +19,7 @@ import pytest
         "From: [security-training@example.com](mailto:security-training@example.com)",
         "Call 12345678.",
         "Addresses: 192.0.2.10 and 2001:db8::10.",
+        "IP:192.0.2.10; IP:2001:db8::1; ip:::1; IP:::ffff:192.0.2.10",
         "Email a1@example.test and b2@example.test; call 12345678 or 87654321.",
         "Repeated: a1@example.test, a1@example.test.",
         "There are no contact details here.",
@@ -43,6 +44,9 @@ def test_extract_prompt(message):
     assert "Preserve repeated occurrences" in instructions
     assert "empty list" in instructions
     assert "IPv4 or IPv6" in instructions
+    assert "The label's colon is separate from the address" in instructions
+    assert "'IP:::1' contains '::1'" in instructions
+    assert "'IP:::ffff:192.0.2.10' contains '::ffff:192.0.2.10'" in instructions
     assert "exactly eight ASCII digits" in instructions
     assert "letters, digits, or hyphens" in instructions
     assert "two groups of four separated by one space" in instructions
@@ -176,6 +180,12 @@ def test_detail_format(key, value):
         ("emails", ["a1@example.test"], "a1@example.test.invalid"),
         ("ip_addresses", ["192.0.2.10"], "192.0.2.100"),
         ("ip_addresses", ["192.0.2.10"], "::ffff:192.0.2.10"),
+        ("ip_addresses", ["192.0.2.10"], "IP:::ffff:192.0.2.10"),
+        ("ip_addresses", ["192.0.2.10"], "IP:192.0.2.100"),
+        ("ip_addresses", ["192.0.2.10"], "skipIP:192.0.2.10"),
+        ("ip_addresses", ["2001:db8::1"], "IP:1234:2001:db8::1"),
+        ("ip_addresses", ["2001:db8::1"], "IP:2001:db8::1a"),
+        ("ip_addresses", ["2001:db8::1"], "IP:2001:db8::1:2"),
         ("ip_addresses", ["192.0.2.47"], "192.0.2.470Training"),
         ("ip_addresses", ["192.0.2.47"], "192.0.2.47.5Device"),
         ("ip_addresses", ["192.0.2.47"], "::ffff:192.0.2.47Training"),
@@ -230,6 +240,10 @@ def test_phone_context(message, phone):
         ),
         ("Address: 192.0.2.47.", ["192.0.2.47"]),
         ("Address: 2001:db8::47.", ["2001:db8::47"]),
+        (
+            "Origin IP:192.0.2.47Training; IP:2001:db8::47; IP:192.0.2.47Device",
+            ["192.0.2.47", "2001:db8::47", "192.0.2.47"],
+        ),
     ],
 )
 def test_ip_context(message, addresses):
@@ -242,12 +256,13 @@ def test_ip_context(message, addresses):
     assert details["ip_addresses"] is addresses
 
 
-@pytest.mark.parametrize("address", ["192.0.2.10", "2001:db8::1"])
-def test_ip_label(address):
+@pytest.mark.parametrize("label", ["IP:", "ip:", "Ip:", "iP:"])
+@pytest.mark.parametrize("address", ["192.0.2.10", "2001:db8::1", "::1", "::ffff:192.0.2.10"])
+def test_ip_label(address, label):
     """Recognize a complete IP address immediately following an IP label."""
-    # Record the source-boundary issue without changing the validator's behavior.
+    # Cover both IP versions and leading colons without changing the returned value.
     details = {"emails": [], "phone_numbers": [], "ip_addresses": [address]}
-    assert ai_manager.validate_details(details, "IP:" + address) is details
+    assert ai_manager.validate_details(details, label + address) is details
 
 
 @pytest.mark.parametrize(
