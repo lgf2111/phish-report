@@ -37,9 +37,11 @@ def collect_input():
 
 def ask_yes_no(question):
     answer = input(question).strip().lower()
-    while answer not in ("y", "n"):
-        answer = input("Please type y or n: ").strip().lower()
-    return answer == "y"
+
+    while answer not in ("y", "yes", "n", "no"):
+        answer = input("Please type yes/y or no/n: ").strip().lower()
+
+    return answer in ("y", "yes")
 
 
 def display_result(result):
