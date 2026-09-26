@@ -77,6 +77,35 @@ def get_message():
 
     return message
 
+def get_link_information():
+    has_link = ask_yes_no("Was a link included? (yes/no): ")
+
+    if not has_link:
+        return False, None
+
+    link = input("Enter the link: ").strip()
+
+    while link == "":
+        link = input(
+            "Link cannot be blank. Please enter the link: "
+        ).strip()
+
+    return True, link
+
+def get_file_information():
+    has_file = ask_yes_no("Was a file included? (yes/no): ")
+
+    if not has_file:
+        return False, None
+
+    file_name = input("Enter the file name: ").strip()
+
+    while file_name == "":
+        file_name = input(
+            "File name cannot be blank. Please enter the file name: "
+        ).strip()
+
+    return True, file_name
 def display_result(result):
     print()
     print("Priority:", result["priority"])
