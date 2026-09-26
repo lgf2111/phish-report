@@ -3,13 +3,17 @@
 
 
 def main_menu():
-    # show the menu and return the user's choice
-    print()
-    print("=== PhishReport ===")
+    print("\n=== PhishReport ===")
     print("1. Check a new message")
     print("2. View saved reports")
     print("3. Quit")
-    return input("Choose 1-3: ").strip()
+
+    choice = input("Choose 1-3: ").strip()
+
+    while choice not in ("1", "2", "3"):
+        choice = input("Invalid choice. Please choose 1-3: ").strip()
+
+    return choice
 
 
 def collect_input():
@@ -43,6 +47,15 @@ def ask_yes_no(question):
 
     return answer in ("y", "yes")
 
+def get_channel():
+    channel = input("Enter channel (Email/SMS/Chat): ").strip().lower()
+
+    while channel not in ("email", "sms", "chat"):
+        channel = input(
+            "Invalid channel. Please enter Email, SMS, or Chat: "
+        ).strip().lower()
+
+    return channel
 
 def display_result(result):
     print()
