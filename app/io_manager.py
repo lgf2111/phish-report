@@ -67,6 +67,16 @@ def get_sender():
 
     return sender
 
+def get_message():
+    message = input("Enter the suspicious message: ").strip()
+
+    while message == "":
+        message = input(
+            "Message cannot be blank. Please enter the suspicious message: "
+        ).strip()
+
+    return message
+
 def display_result(result):
     print()
     print("Priority:", result["priority"])
