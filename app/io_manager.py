@@ -57,6 +57,16 @@ def get_channel():
 
     return channel
 
+def get_sender():
+    sender = input(
+        "Enter sender information (press Enter if unknown): "
+    ).strip()
+
+    if sender == "":
+        return None
+
+    return sender
+
 def display_result(result):
     print()
     print("Priority:", result["priority"])
